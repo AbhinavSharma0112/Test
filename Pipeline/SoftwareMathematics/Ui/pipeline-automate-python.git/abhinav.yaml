@@ -1,0 +1,19 @@
+name: abhinav
+company name: Ui
+repository url:  https://github.com/SM-Training/pipeline-automate-python.git
+enabled: yes
+job_type: web
+run_command: java -Xmx256m -jar app.jar
+src_path: None
+application_port: 666
+deploy_port: devport
+ssh_port_prod: 
+ssh_port_dev: 
+build_command: mvn clean install -DskipTests -s $MAVEN_SETTING
+pvt_deploy_servers_dev: 
+deploy_servers_dev: 
+pvt_deploy_servers_prod: 
+deploy_servers_prod: 
+deploy_env_prod: None
+deploy_env_dev: None
+deploy_env: --dev

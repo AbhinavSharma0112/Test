@@ -1,0 +1,19 @@
+name: Shrey
+company_name: Ui
+repository url: pipeline
+enabled: True
+job_type: software
+run_command: java Xmx256m jar app.jar
+src_path: categoryservice
+application_port: 666
+deploy_port: 213
+ssh_port_prod: 
+ssh_port_dev: 22
+build_command: mvn clean install DskipTests s $MAVEN_SETTING
+pvt_deploy_servers_dev: 185.207.250.107 185.207.250.107 185.207.250.107
+deploy_servers_dev: 185.207.250.107 185.207.250.107 185.207.250.107 185.207.250.107
+pvt_deploy_servers_prod: 
+deploy_servers_prod: 
+deploy_env_prod: 
+deploy_env_dev: https://redketchup.io/colorpicker
+deploy_env: dev

@@ -1,0 +1,19 @@
+name: xyz
+company name: Api
+repository url:  https://github.com/SM-Training/pipeline-automate-python.git
+enabled: yes
+job_type: web
+run_command: java -Xmx256m -jar app.jar
+src_path: category-service
+application_port: 666
+deploy_port: 213
+ssh_port_prod: sshport
+ssh_port_dev: sshdev
+build_command: mvn clean install -DskipTests -s $MAVEN_SETTING
+pvt_deploy_servers_dev: --185.207.250.107 --185.207.250.107 --185.207.250.107
+deploy_servers_dev: --185.207.250.107 --185.207.250.107 --185.207.250.107 --185.207.250.107
+pvt_deploy_servers_prod: -jhhkk
+deploy_servers_prod: -dspp
+deploy_env_prod: depp
+deploy_env_dev:  https://redketchup.io/color-picker
+deploy_env: --dev

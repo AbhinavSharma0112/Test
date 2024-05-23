@@ -1,0 +1,19 @@
+name: Shreya
+company_name: api
+repository url: https://github.com/SM-Training/pipeline-automate-python
+enabled: yes
+job_type: intern
+run_command: java
+src_path: category-service 
+application_port: https://github.com/SM-Training/Creating_yamlFile/tree/master
+deploy_port: https://github.com/SM-Training/Creating_yamlFile/tree/master
+ssh_port_prod: 2232
+ssh_port_dev: 22
+build_command: https://github.com/SM-Training/Creating_yamlFile/tree/master
+pvt_deploy_servers_dev: -deploy,servers,dev,pvt
+deploy_servers_dev: -deploy,servers,dev,pvt
+pvt_deploy_servers_prod: -10.27.84.43 -185.207.250.107 -185.207.250.107
+deploy_servers_prodt: null
+deploy_env_prod: https://workspace.google.com/marketplace/app/pretty_forms_designer/1077249372154
+deploy_env_dev: https://redketchup.io/color-picker
+deploy_env: -dev

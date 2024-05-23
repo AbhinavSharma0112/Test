@@ -1,0 +1,19 @@
+name: 0191CSE066
+company name: Api
+repository url: python
+enabled: yes
+job_type: web
+run_command: java
+src_path: None
+application_port: 666
+deploy_port: 213
+ssh_port_prod: 2232
+ssh_port_dev: 22
+build_command: mvn clean install -DskipTests -s $MAVEN_SETTING
+pvt_deploy_servers_dev: -185.207.250.107 -185.207.250.107 -185.207.250.107
+deploy_servers_dev: -185.207.250.107 -185.207.250.107 -185.207.250.107 -185.207.250.107
+pvt_deploy_servers_prod: -10.27.84.43 -185.207.250.107 -185.207.250.107
+deploy_servers_prod: -103.27.84.43
+deploy_env_prod: None
+deploy_env_dev: None
+deploy_env: -dev
