@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline Automation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/mystyle.css">
+    <link rel="stylesheet" href="static/main.css">
+    <style>
+        .centered {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .options-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .option {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="centered">
+            <h1 class="text-center p-5">Welcome to Pipeline Automation</h1>
+            <div class="options-container">
+                <div class="option">
+                    <div class="card h-100 service" style="padding: 15px;">
+                        <i class='fas fa-balance-scale-left serviceicon'></i>
+                        <div class="card-body">
+                            <h5 class="card-title">Create new pipeline</h5>
+                            <a class="btn" href="/create" style="background: #7863AD;color:white;">New pipeline</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="option">
+                    <div class="card h-100 service" style="padding: 15px;">
+                        <i class='fas fa-book serviceicon'></i>
+                        <div class="card-body">
+                            <h5 class="card-title">Edit Existing Pipeline</h5>
+                            <form id="companyForm">
+                                <select class="form-select" id="companySelect" name="company_name" style="width: 50%;">
+                                    <option value="">Select Job_type</option>
+                                    {% for company in company_names %}
+                                    <option value="{{ company }}">{{ company }}</option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                            <div class="col-md-12 p-2 reposelect">
+                                <form id="repoForm">
+                                    <label for="repoSelect" class="form-label" style="font-weight:50px;">Select
+                                        Repsository</label>
+                                    <select class="form-select read" id="repoSelect" name="repo_name" disabled
+                                        style="width: 50%;">
+                                        <option value="">Select Respository</option>
+                                        <option value="">Select a company first</option>
+                                    </select>
+                                </form>
+                            </div>
+                            <div class="col-md-12 p-2 fileselect">
+                                <label for="fileSelect" class="form-label">Select File</label>
+                                <select class="form-select" id="fileSelect" name="file_name" disabled
+                                    style="width: 50%;">
+                                    <option value="">Select a repository first</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const companySelect = document.getElementById("companySelect");
+            const repoSelect = document.getElementById("repoSelect");
+            const fileSelect = document.getElementById("fileSelect");
+            const reposelect = document.querySelector(".reposelect");
+            const fileselect = document.querySelector(".fileselect");
+
+            companySelect.addEventListener("change", function () {
+                const selectedCompany = this.value;
+                reposelect.style.display = "block";
+                repoSelect.disabled = true;
+                fileSelect.disabled = true;
+                repoSelect.innerHTML = "<option value=''>Loading...</option>";
+                fetchRepoNames(selectedCompany);
+            });
+
+            repoSelect.addEventListener("change", function () {
+                const selectedCompany = companySelect.value;
+                const selectedRepo = this.value;
+                fileselect.style.display = "block";
+                fileSelect.disabled = true;
+                fileSelect.innerHTML = "<option value=''>Loading...</option>";
+                fetchFileNames(selectedCompany, selectedRepo);
+            });
+
+            fileSelect.addEventListener("change", function () {
+                const selectedCompany = companySelect.value;
+                const selectedRepo = repoSelect.value;
+                const selectedFile = this.value;
+                fileSelect.disabled = false;
+                fetchAllNames(selectedCompany, selectedRepo, selectedFile);
+            });
+
+
+            function fetchRepoNames(company) {
+                fetch("/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        company_name: company
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        repoSelect.innerHTML = "<option value=''>Select a Repository</option>";
+                        data.forEach(repo => {
+                            const option = document.createElement("option");
+                            option.value = repo;
+                            option.textContent = repo;
+                            repoSelect.appendChild(option);
+                        });
+                        repoSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error("Error fetching repository names:", error);
+                        repoSelect.innerHTML = "<option value=''>Failed to fetch repositories</option>";
+                    });
+            }
+
+            function fetchFileNames(company, repo) {
+                fetch("/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        company_name: company,
+                        repo_name: repo
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        fileSelect.innerHTML = "<option value=''>Select a File</option>";
+                        data.forEach(file => {
+                            const option = document.createElement("option");
+                            option.value = file;
+                            option.textContent = file;
+                            fileSelect.appendChild(option);
+                        });
+                        fileSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error("Error fetching file names:", error);
+                        fileSelect.innerHTML = "<option value=''>Failed to fetch files</option>";
+                    });
+            }
+
+            function fetchAllNames(company, repo, file) {
+                fetch(`/update?company_name=${company}&repo_name=${repo}&file_name=${file}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = `/update?company_name=${company}&repo_name=${repo}&file_name=${file}`;
+                            console.error("Error:", response.statusText);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+            }
+
+        });
+    </script>
+</body>
+
+</html>

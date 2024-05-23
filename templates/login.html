@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #FFB6C1, #87CEFA); /* Pink to light blue gradient background */
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 40px 30px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #FFFFFF, #F0F8FF); /* White to light blue gradient container background */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Soft box shadow */
+        }
+
+        .container h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: none;
+            background-color: #f7f7f7; /* Light gray background for form inputs */
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
+            transition: box-shadow 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            box-shadow: 0 3px 20px rgba(0, 0, 0, 0.2); /* Larger shadow on focus */
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-primary, .btn-signup {
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-size: 16px;
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            width: 48%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF1493, #FF69B4); /* Pink to pink gradient button background */
+        }
+
+        .btn-signup {
+            background: linear-gradient(135deg, #20B2AA, #87CEFA); /* Dark turquoise to light blue gradient button background */
+        }
+
+        .btn-primary:hover, .btn-signup:hover {
+            transform: translateY(-3px); /* Move up slightly on hover */
+            opacity: 0.9; /* Slightly reduce opacity on hover */
+        }
+
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Authentication</h1>
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+        <form action="/login" method="post">
+            <div class="mb-4">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" id="username" placeholder="Enter your username" required>
+            </div>
+            <div class="mb-4">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" id="password" placeholder="Enter your password" required>
+            </div>
+            <div class="btn-container">
+                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="button" onclick="window.location.href='/signup'" class="btn btn-signup">Sign Up</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+

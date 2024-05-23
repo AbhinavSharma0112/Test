@@ -1,0 +1,53 @@
+.bg {
+    background: #EBE4F4;
+    padding: 20px;
+}
+
+.container {
+    display: flex;
+}
+
+.heading {
+    align-items: center;
+}
+
+.form-control {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .container {
+        max-width: 80%;
+        padding: 20px;
+    }
+}
+
+.reposelect{
+    display:none;
+}
+
+.fileselect{
+    display:none;
+}
+
+
+.service>div>a{
+    color: #4b9b12;
+    font-weight: 800;
+  }
+  .card{
+    transition: all 0.3s;
+  }
+  .card:hover{
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+  }
+  .card-body>h5{
+    font-weight: 600;
+    font-size: 25px;
+  }
+  .card-body>p{
+    font-size: 16px;
+  }
+  

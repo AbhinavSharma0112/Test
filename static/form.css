@@ -1,0 +1,90 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #FFB6C1, #87CEFA);
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 30px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #FFFFFF, #F0F8FF);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.mb-3 {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: bold;
+    color: #555;
+}
+
+.text-danger {
+    color: red;
+}
+
+.btn-secondary {
+    background-color: #7863AD;
+    border-color: #7863AD;
+}
+
+.bg {
+    background-color: #F5F5F5;
+}
+
+.heading {
+    color: #333;
+}
+
+/* Custom Styling */
+.form-control {
+    border-radius: 15px;
+    padding: 12px;
+    border: 1px solid #ccc;
+}
+
+.form-control:focus {
+    border-color: #7863AD;
+    box-shadow: 0 0 0 0.25rem rgba(120, 99, 173, 0.25);
+}
+
+.form-select {
+    border-radius: 15px;
+    padding: 12px;
+    border: 1px solid #ccc;
+}
+
+.form-select:focus {
+    border-color: #7863AD;
+    box-shadow: 0 0 0 0.25rem rgba(120, 99, 173, 0.25);
+}
+
+.form-check-input {
+    margin-top: 8px;
+}
+
+.form-check-label {
+    margin-left: 5px;
+}
+
+.my-btn {
+    margin-top: 20px;
+}
+
+.btn-secondary:hover {
+    background-color: #654d8f;
+    border-color: #654d8f;
+}
+
+.btn-secondary:active {
+    background-color: #4c3a6e;
+    border-color: #4c3a6e;
+}
+
+.btn-secondary:focus {
+    box-shadow: 0 0 0 0.25rem rgba(120, 99, 173, 0.5);
+}
