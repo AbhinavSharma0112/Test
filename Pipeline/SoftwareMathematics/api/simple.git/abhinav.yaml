@@ -1,0 +1,19 @@
+name: abhinav
+company name: api
+repository url: https://myurl.com/simple.git
+enabled: yes
+job_type: intern
+run_command: a
+src_path: a
+application_port: a
+deploy_port: a
+ssh_port_prod: a
+ssh_port_dev: a
+build_command: a
+pvt_deploy_servers_dev: -a
+deploy_servers_dev: -a
+pvt_deploy_servers_prod: -a
+deploy_servers_prod: -a
+deploy_env_prod: a
+deploy_env_dev: a
+deploy_env: -a
