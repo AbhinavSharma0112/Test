@@ -166,6 +166,7 @@ def get_company_names(repo_owner, repo_name, github_token):
     return company_names
 
 
+
 def get_company_details(company_name, repo_name, file_name, REPO_OWNER, REPO_NAME,
                         GITHUB_TOKEN):
     company_details = {}
@@ -405,7 +406,7 @@ def update():
     return "Updated"
 
 
-def save_to_github(data):
+def save_to_github(data,branch='Test2'):
     field_order = [
         "name", "company_name", "repository url", "enabled", "job_type", "run_command",
         "src_path", "application_port", "deploy_port", "ssh_port_prod", "ssh_port_dev",
@@ -432,7 +433,7 @@ def save_to_github(data):
     file_path = f'Pipeline/SoftwareMathematics/{data["company_name"]}/{repo_name}/{file_name}'
 
     # Construct the GitHub API URL
-    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}'
+    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}?ref={branch}'
 
     # Prepare headers for the GitHub API request
     headers = {
@@ -456,9 +457,10 @@ def save_to_github(data):
         # File does not exist, create a new file
         payload = {
             'message': 'Create file',
-            'content': file_content_base64
+            'content': file_content_base64,
+
         }
-        response = requests.put(url, headers=headers, json=payload)
+        response = requests.post(url, headers=headers, json=payload)
 
     # Return the result message
     if response.status_code == 201 or response.status_code == 200:
