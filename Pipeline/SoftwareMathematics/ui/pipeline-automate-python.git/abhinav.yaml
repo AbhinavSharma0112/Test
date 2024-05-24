@@ -1,0 +1,19 @@
+name: abhinav
+company name: ui
+repository url:  https://github.com/SM-Training/pipeline-automate-python.git
+enabled: yes
+job_type: web
+run_command: java -Xmx256m -jar app.jar
+src_path: http://myurl.com/advance1234.git
+application_port: f
+deploy_port: f
+ssh_port_prod: g
+ssh_port_dev: g
+build_command: j
+pvt_deploy_servers_dev: -j
+deploy_servers_dev: -j
+pvt_deploy_servers_prod: -j
+deploy_servers_prod: -j
+deploy_env_prod: j
+deploy_env_dev: j
+deploy_env: -j
