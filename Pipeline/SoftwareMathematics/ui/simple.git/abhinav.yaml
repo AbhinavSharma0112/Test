@@ -1,0 +1,19 @@
+name: abhinav
+company_name: ui
+repository url: https://myurl.com/simple.git
+enabled: yes
+job_type: web
+run_command: java -Xmx256m -jar app.jar
+src_path: https://myurl.com/advance.git
+application_port: appport
+deploy_port: t
+ssh_port_prod: t
+ssh_port_dev: t
+build_command: t
+pvt_deploy_servers_dev: -t
+deploy_servers_dev: -t
+pvt_deploy_servers_prod: -t
+deploy_servers_prodt: null
+deploy_env_prod: t
+deploy_env_dev: t
+deploy_env: -dev
