@@ -1,0 +1,19 @@
+name: abhinav
+company_name: api
+repository url:  https://github.com/SM-Training/pipeline-automate-python.git
+enabled: yes
+job_type: web
+run_command: runcmdd
+src_path: f
+application_port: f
+deploy_port: f
+ssh_port_prod: f
+ssh_port_dev: f
+build_command: f
+pvt_deploy_servers_dev: -f
+deploy_servers_dev: -f
+pvt_deploy_servers_prod: -f
+deploy_servers_prodt: null
+deploy_env_prod: f
+deploy_env_dev: f
+deploy_env: -f
