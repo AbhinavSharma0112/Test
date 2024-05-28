@@ -1,20 +1,83 @@
-import inspect
-import time
-import traceback
-from flask import Flask, jsonify, render_template, request, redirect, session, url_for
+from flask import Flask, jsonify, request, redirect, session, url_for, render_template
+from flask_restful import Api, Resource, reqparse
+from werkzeug.security import generate_password_hash, check_password_hash
 import requests
 import yaml
 import os
 import base64
-from collections import OrderedDict
-from dotenv import load_dotenv
-from pymongo import MongoClient
-from werkzeug.security import generate_password_hash, check_password_hash
 import logging
+from pymongo import MongoClient
+from dotenv import load_dotenv
+import time
+import traceback
+
 load_dotenv()
 
+# Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Secret key for session
+api = Api(app)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# MongoDB connection
+mongo_client = MongoClient('mongodb://77.37.45.154:27017/')
+db = mongo_client['UserAuth']
+users_collection = db['Users']
+
+# Example database for storing user data
+users = [
+    {'username': 'user1', 'password_hash': generate_password_hash('password1')},
+    {'username': 'user2', 'password_hash': generate_password_hash('password2')}
+]
+
+# Parser for parsing login/signup requests
+parser = reqparse.RequestParser()
+parser.add_argument('username', type=str, required=True, help="Username is required")
+parser.add_argument('password', type=str, required=True, help="Password is required")
+
+
+class Login(Resource):
+    def post(self):
+        args = parser.parse_args()
+        username = args['username']
+        password = args['password']
+
+        # Check if user exists
+        user = next((u for u in users if u['username'] == username), None)
+        if user and check_password_hash(user['password_hash'], password):
+            session['username'] = username  # Log in the user
+            return {'message': 'Login successful'}, 200
+        else:
+            return {'error': 'Invalid username or password'}, 401
+
+
+class Signup(Resource):
+    def post(self):
+        args = parser.parse_args()
+        username = args['username']
+        password = args['password']
+
+        # Check if username is already taken
+        if users_collection.find_one({'username': username}):
+            return {'error': 'Username already exists'}, 400
+
+        # Hash the password
+        password_hash = generate_password_hash(password)
+
+        # Insert new user data into MongoDB
+        user_data = {'username': username, 'password': password_hash}
+        users_collection.insert_one(user_data)
+
+        return {'message': 'Signup successful'}, 201
+
+
+# Add resources to the API
+# api.add_resource(Login, '/login')
+# api.add_resource(Signup, '/signup')
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -29,11 +92,11 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 REPO_OWNER = os.getenv("REPO_OWNER")
 REPO_NAME = os.getenv("REPO_NAME")
 
-
 ip_request_counts = {}
 
 
 def update_ip_request_count(ip_address):
+    logger.info(f"Updating request count for IP address: {ip_address}")
     current_time = time.time()
     if ip_address in ip_request_counts:
         count, timestamp = ip_request_counts[ip_address]
@@ -52,6 +115,7 @@ def update_ip_request_count(ip_address):
 
 
 def check_rate_limit(response):
+    logger.info("Checking rate limit")
     if 'headers' in response:
         remaining = int(response['headers'].get('X-RateLimit-Remaining', 0))
         reset_time = int(response['headers'].get('X-RateLimit-Reset', 0))
@@ -62,6 +126,7 @@ def check_rate_limit(response):
 
 
 def delete_file_from_github(company_name, repo_name, file_name, github_token):
+    logger.info(f"Deleting file '{file_name}' from GitHub")
     file_path = f'Pipeline/SoftwareMathematics/{company_name}/{repo_name}/{file_name}'
     url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}'
 
@@ -99,11 +164,12 @@ def delete_file_from_github(company_name, repo_name, file_name, github_token):
 
 
 def fetch_file_names(company_name, repo_name, access_token):
+    logger.info(f"Fetching file names for company '{company_name}' and repo '{repo_name}'")
     file_names = []
 
     target_url = (
-            f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/Pipeline/SoftwareMathematics/'
-            f'{company_name}/{repo_name}')
+        f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/Pipeline/SoftwareMathematics/'
+        f'{company_name}/{repo_name}')
     headers = {"Authorization": f"token {access_token}"} if access_token else {}
 
     response = requests.get(target_url, headers=headers)
@@ -120,11 +186,12 @@ def fetch_file_names(company_name, repo_name, access_token):
 
 
 def fetch_repo_names(company_name, access_token):
+    logger.info(f"Fetching repository names for company '{company_name}'")
     repo_names = []
 
     target_url = (
-            f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/Pipeline/SoftwareMathematics/'
-            f'{company_name}')
+        f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/Pipeline/SoftwareMathematics/'
+        f'{company_name}')
 
     headers = {"Authorization": f"token {access_token}"} if access_token else {}
 
@@ -164,7 +231,6 @@ def get_company_names(repo_owner, repo_name, github_token):
         logger.error("Response content: %s", response.content.decode())  # Print response content for debugging
 
     return company_names
-
 
 
 def get_company_details(company_name, repo_name, file_name, REPO_OWNER, REPO_NAME,
@@ -208,6 +274,7 @@ def get_company_details(company_name, repo_name, file_name, REPO_OWNER, REPO_NAM
 @app.route('/add', methods=['GET', 'POST'])
 def add_form():
     if request.method == 'POST':
+        # Retrieve form data
         username = request.form.get('username')
         companyname = request.form.get('companyname')
         repo_url = request.form.get('repourl')
@@ -229,41 +296,25 @@ def add_form():
         deploy_env = request.form.get('deployenv')
 
         # Assuming pvt_deploy_servers_dev is a string containing IP addresses separated by spaces
-        pvt_deploy_servers_dev_list = ' '.join(
-            ['-' + ip for ip in filter(None, pvt_deploy_servers_dev.split())]) if pvt_deploy_servers_dev else ''
-        deploy_servers_prod_list = ' '.join(
-            ['-' + ip for ip in filter(None, deploy_servers_prod.split())]) if deploy_servers_prod else ''
-        pvt_deploy_servers_prod_list = ' '.join(
-            ['-' + ip for ip in filter(None, pvt_deploy_servers_prod.split())]) if pvt_deploy_servers_prod else ''
-        deploy_servers_dev_list = ' '.join(
-            ['-' + ip for ip in filter(None, deploy_servers_dev.split())]) if deploy_servers_dev else ''
-        deploy_env_list = ' '.join(['-' + ip for ip in filter(None, deploy_env.split())]) if deploy_env else ''
+        pvt_deploy_servers_dev_list = format_ip_list(pvt_deploy_servers_dev)
+        deploy_servers_prod_list = format_ip_list(deploy_servers_prod)
+        pvt_deploy_servers_prod_list = format_ip_list(pvt_deploy_servers_prod)
+        deploy_servers_dev_list = format_ip_list(deploy_servers_dev)
+        deploy_env_list = format_ip_list(deploy_env)
 
         # Define the order of fields
         field_order = [
-            "name",
-            "company name",
-            "repository url",
-            "enabled",
-            "job_type",
-            "run_command",
-            "src_path",
-            "application_port",
-            "deploy_port",
-            "ssh_port_prod",
-            "ssh_port_dev",
-            "build_command",
-            "pvt_deploy_servers_dev",
-            "deploy_servers_dev",
-            "pvt_deploy_servers_prod",
-            "deploy_servers_prod",
-            "deploy_env_prod",
-            "deploy_env_dev",
-            "deploy_env"
+            "name", "company_name", "repository url", "enabled", "job_type", "run_command",
+            "src_path", "application_port", "deploy_port", "ssh_port_prod", "ssh_port_dev",
+            "build_command", "pvt_deploy_servers_dev", "deploy_servers_dev",
+            "pvt_deploy_servers_prod", "deploy_servers_prodt", "deploy_env_prod",
+            "deploy_env_dev", "deploy_env"
         ]
+
+        # Define the data
         data = {
             "name": username,
-            "company name": companyname,
+            "company_name": companyname,
             "repository url": repo_url,
             "enabled": enabled,
             "job_type": job_type,
@@ -283,60 +334,20 @@ def add_form():
             "deploy_env": deploy_env_list
         }
 
-        data = OrderedDict((key, data[key]) for key in field_order if key in data)
+        # Save to GitHub
+        result_message = save_to_github(data)
+        logger.info(result_message)
 
-        formatted_yaml = ''
-        for field in field_order:
-            if field in data:
-                value = data[field]
-                if isinstance(value, list):
-                    value = yaml.dump(value, default_flow_style=False).strip()
-                formatted_yaml += f"{field}: {value}\n"
-            else:
-                formatted_yaml += f"{field}: null\n"
-
-        file_content_base64 = base64.b64encode(formatted_yaml.encode()).decode()
-
-        repo_parts = data["repository url"].split('/')
-        repo_name = repo_parts[-1]
-
-        file_name = f'{data["name"]}.yaml'
-        file_path = f'Pipeline/SoftwareMathematics/{data["company name"]}/{repo_name}/{file_name}'
-
-        url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}'
-
-        headers = {
-            'Authorization': f'token {GITHUB_TOKEN}',
-            'Accept': 'application/vnd.github.v3+json'
-        }
-
-        response = requests.get(url, headers=headers)
-
-        if response.status_code == 200:
-            # File already exists, update its content
-            existing_file = response.json()
-            payload = {
-                'message': 'Update file',
-                'content': file_content_base64,
-                'sha': existing_file['sha']  # SHA of the existing file for update
-            }
-            response = requests.put(url, headers=headers, json=payload)
-        elif response.status_code == 404:
-            # File does not exist, create a new file
-            payload = {
-                'message': 'Create file',
-                'content': file_content_base64
-            }
-            response = requests.put(url, headers=headers, json=payload)
-
-        if response.status_code == 201 or response.status_code == 200:
-            logger.info('File saved successfully to GitHub.')
-            return 'File saved successfully to GitHub.'
-        else:
-            logger.error(f'Failed to save file to GitHub. Status code: {response.status_code}')
-            return f'Failed to save file to GitHub. Status code: {response.status_code}'
+        return result_message
 
     return "Data saved successfully!!"
+
+
+def format_ip_list(ip_string):
+    if ip_string:
+        return ' '.join(['-' + ip for ip in filter(None, ip_string.split())])
+    else:
+        return ''
 
 
 @app.route('/update', methods=['GET', 'POST'])
@@ -346,7 +357,7 @@ def update():
         repo_names = request.args.get('repo_name')
         file_names = request.args.get('file_name')
         company_details = get_company_details(company_names, repo_names, file_names, REPO_OWNER, REPO_NAME,
-                                               GITHUB_TOKEN)
+                                              GITHUB_TOKEN)
         return render_template("update.html", company_details=company_details)
 
     elif request.method == "POST":
@@ -365,10 +376,10 @@ def update():
                 'ssh_port_prod': request.form.get('sshportprod'),
                 'ssh_port_dev': request.form.get('sshportdev'),
                 'build_command': request.form.get('buildcommand'),
-                'pvt_deploy_servers_dev': request.form.get('pvtdeployserversdev'),
-                'deploy_servers_dev': request.form.get('deployserversdev'),
-                'pvt_deploy_servers_prod': request.form.get('pvtdeployserversprod'),
-                'deploy_servers_prod': request.form.get('deployserversprod'),
+                'pvt_deploy_servers_dev': format_ip_list(request.form.get('pvtdeployserversdev')),
+                'deploy_servers_dev': format_ip_list(request.form.get('deployserversdev')),
+                'pvt_deploy_servers_prod': format_ip_list(request.form.get('pvtdeployserversprod')),
+                'deploy_servers_prod': format_ip_list(request.form.get('deployserversprod')),
                 'deploy_env_prod': request.form.get('deployenvprod'),
                 'deploy_env_dev': request.form.get('deployenvdev'),
                 'deploy_env': request.form.get('deployenv')
@@ -378,8 +389,6 @@ def update():
             new_username = request.form.get('username')
             old_username = request.form.get('old_username')
             company_name = request.form.get('companyname')
-            old_repo_url = request.form.get('old_repourl')
-            new_repo_url = request.form.get('repourl')
 
             repo_parts = new_data["repository url"].split('/')
             repo_name = repo_parts[-1]
@@ -400,7 +409,7 @@ def update():
 
         except Exception as e:
             error_message = traceback.format_exc()  # Get the full traceback as a string
-            logger.error(f"An error occurred at line {inspect.currentframe().f_lineno}: {error_message}")
+            logger.error(f"An error occurred: {error_message}")  # Log the error message
             return render_template("error.html", error_message=error_message)
 
     return "Updated"
@@ -411,7 +420,7 @@ def save_to_github(data,branch='Test2'):
         "name", "company_name", "repository url", "enabled", "job_type", "run_command",
         "src_path", "application_port", "deploy_port", "ssh_port_prod", "ssh_port_dev",
         "build_command", "pvt_deploy_servers_dev", "deploy_servers_dev",
-        "pvt_deploy_servers_prod", "deploy_servers_prod", "deploy_env_prod",
+        "pvt_deploy_servers_prod", "deploy_servers_prodt", "deploy_env_prod",
         "deploy_env_dev", "deploy_env"
     ]
 
@@ -433,7 +442,7 @@ def save_to_github(data,branch='Test2'):
     file_path = f'Pipeline/SoftwareMathematics/{data["company_name"]}/{repo_name}/{file_name}'
 
     # Construct the GitHub API URL
-    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}?ref={branch}'
+    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}'
 
     # Prepare headers for the GitHub API request
     headers = {
@@ -450,7 +459,8 @@ def save_to_github(data,branch='Test2'):
         payload = {
             'message': 'Update file',
             'content': file_content_base64,
-            'sha': existing_file['sha']  # SHA of the existing file for update
+            'sha': existing_file['sha'],  # SHA of the existing file for update
+            'Branch':branch
         }
         response = requests.put(url, headers=headers, json=payload)
     elif response.status_code == 404:
@@ -458,9 +468,9 @@ def save_to_github(data,branch='Test2'):
         payload = {
             'message': 'Create file',
             'content': file_content_base64,
-
+            'branch':branch
         }
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.put(url, headers=headers, json=payload)
 
     # Return the result message
     if response.status_code == 201 or response.status_code == 200:
@@ -473,30 +483,34 @@ def save_to_github(data,branch='Test2'):
 
 @app.route('/create')
 def create_user():
-    return render_template("index.html")
+    try:
+        return render_template("index.html")
+    except Exception as e:
+        logger.error(f"An error occurred in /create route: {str(e)}")
+        return "An error occurred"
 
 
 @app.route('/', methods=['GET', 'POST'])
 def new_index():
-    if 'username' not in session:
-        # If user is not logged in, redirect to login page
-        return redirect(url_for('login'))
-    if request.method == 'POST':
-        data = request.get_json()
-        company_names = data.get('company_name')
-        repo_names = data.get('repo_name')
-        file_names = data.get('file_name')
-        if company_names and not repo_names:
-            repo_names = fetch_repo_names(company_names, GITHUB_TOKEN)
-            return jsonify(repo_names)
+    try:
+        if 'username' not in session:
+            # If user is not logged in, redirect to login page
+            return redirect(url_for('login'))
+        if request.method == 'POST':
+            data = request.get_json()
+            company_names = data.get('company_name')
+            repo_names = data.get('repo_name')
+            file_names = data.get('file_name')
+            if company_names and not repo_names:
+                repo_names = fetch_repo_names(company_names, GITHUB_TOKEN)
+                return jsonify(repo_names)
 
-        if company_names and repo_names:
-            file_names = fetch_file_names(company_names, repo_names, GITHUB_TOKEN)
-            return jsonify(file_names)
+            if company_names and repo_names:
+                file_names = fetch_file_names(company_names, repo_names, GITHUB_TOKEN)
+                return jsonify(file_names)
+            else:
+                return jsonify({})
         else:
-            return jsonify({})
-    else:
-        try:
             # Handle the GET request here
             company_names = get_company_names(REPO_OWNER, REPO_NAME, GITHUB_TOKEN)
 
@@ -504,62 +518,78 @@ def new_index():
             logger.info(f"Company names: {company_names}")
 
             return render_template("base.html", company_names=company_names)
-        except Exception as e:
-            # Log any exceptions
-            logger.error(f"An error occurred: {str(e)}")
-            return "An error occurred"
+    except Exception as e:
+        # Log any exceptions
+        logger.error(f"An error occurred in / route: {str(e)}")
+        return "An error occurred"
 
 
-# Login authentication
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    try:
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
 
-        # Check if the username exists in the database
-        user = users_collection.find_one({'username': username})
-        if user and check_password_hash(user['password'], password):
-            # If username and password match, log in the user
-            session['username'] = username
-            return redirect('/')
+            # Check if the username exists in the database
+            user = users_collection.find_one({'username': username})
+            if user and check_password_hash(user['password'], password):
+                # If username and password match, log in the user
+                session['username'] = username
+                return redirect('/')
+            else:
+                # If username or password is incorrect, render the login page with an error
+                return render_template('login.html', error='Invalid username or password')
+
         else:
-            # If username or password is incorrect, render the login page with an error
-            return render_template('login.html', error='Invalid username or password')
-    else:
-        # If it's a GET request, render the login form
-        return render_template('login.html')
+            # If it's a GET request, render the login form
+            return render_template('login.html')
+    except Exception as e:
+        # Log any exceptions
+        logger.error(f"An error occurred in /login route: {str(e)}")
+        return "An error occurred"
 
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    if request.method == 'POST':
-        # Retrieve form data
-        username = request.form.get('username')
-        password = request.form.get('password')
+    try:
+        if request.method == 'POST':
+            # Retrieve form data
+            username = request.form.get('username')
+            password = request.form.get('password')
 
-        # Check if the username already exists
-        if users_collection.find_one({'username': username}):
-            error_message = 'Username already exists. Please choose a different username.'
-            return render_template('sign_up.html', error=error_message)
+            # Check if the username already exists
+            if users_collection.find_one({'username': username}):
+                error_message = 'Username already exists. Please choose a different username.'
+                return render_template('sign_up.html', error=error_message)
 
-        # Hash the password before storing it
-        hashed_password = generate_password_hash(password)
+            # Hash the password before storing it
+            hashed_password = generate_password_hash(password)
 
-        # Insert new user data into MongoDB
-        user_data = {'username': username, 'password': hashed_password}
-        users_collection.insert_one(user_data)
+            # Insert new user data into MongoDB
+            user_data = {'username': username, 'password': hashed_password}
+            users_collection.insert_one(user_data)
 
-        return redirect(url_for('login'))
-    else:
-        return render_template('sign_up.html')
+            return redirect(url_for('login'))
+        else:
+            return render_template('sign_up.html')
+    except Exception as e:
+        # Log any exceptions
+        logger.error(f"An error occurred in /signup route: {str(e)}")
+        return "An error occurred"
 
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)  # Remove the username from the session
-    return redirect(url_for('login'))  # Redirect to the login page
+    try:
+        session.pop('username', None)  # Remove the username from the session
+        return redirect(url_for('login'))
+    except Exception as e:
+        # Log any exceptions
+        logger.error(f"An error occurred in /logout route: {str(e)}")
+        return "An error occurred"
 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+
