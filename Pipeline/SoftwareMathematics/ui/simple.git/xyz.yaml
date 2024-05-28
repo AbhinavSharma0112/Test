@@ -1,0 +1,19 @@
+name: xyz
+company_name: ui
+repository url: https://myurl.com/simple.git
+enabled: yes
+job_type: software
+run_command: java -Xmx256m -jar app.jar
+src_path: http://myurl.com/advance1234.git
+application_port: hgfh
+deploy_port: devport
+ssh_port_prod: sshport
+ssh_port_dev: sshdev
+build_command: mvn clean install -DskipTests -s $MAVEN_SETTING
+pvt_deploy_servers_dev: --185.207.250.107 --185.207.250.107 --185.207.250.107
+deploy_servers_dev: -h
+pvt_deploy_servers_prod: -h
+deploy_servers_prodt: null
+deploy_env_prod: h
+deploy_env_dev: h
+deploy_env: -h
