@@ -14,6 +14,6 @@ pvt_deploy_servers_dev: -h
 deploy_servers_dev: -h
 pvt_deploy_servers_prod: -h
 deploy_servers_prodt: null
-deploy_env_prod: h
+deploy_env_prod: ert
 deploy_env_dev: h
 deploy_env: -h
