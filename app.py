@@ -13,6 +13,8 @@ import traceback
 
 load_dotenv()
 
+def is_logged_in():
+    return 'username' in session
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Secret key for session
@@ -415,7 +417,7 @@ def update():
     return "Updated"
 
 
-def save_to_github(data,branch='Test2'):
+def save_to_github(data):
     field_order = [
         "name", "company_name", "repository url", "enabled", "job_type", "run_command",
         "src_path", "application_port", "deploy_port", "ssh_port_prod", "ssh_port_dev",
@@ -459,16 +461,14 @@ def save_to_github(data,branch='Test2'):
         payload = {
             'message': 'Update file',
             'content': file_content_base64,
-            'sha': existing_file['sha'],  # SHA of the existing file for update
-            'Branch':branch
+            'sha': existing_file['sha']  # SHA of the existing file for update
         }
         response = requests.put(url, headers=headers, json=payload)
     elif response.status_code == 404:
         # File does not exist, create a new file
         payload = {
             'message': 'Create file',
-            'content': file_content_base64,
-            'branch':branch
+            'content': file_content_base64
         }
         response = requests.put(url, headers=headers, json=payload)
 
@@ -483,12 +483,14 @@ def save_to_github(data,branch='Test2'):
 
 @app.route('/create')
 def create_user():
-    try:
-        return render_template("index.html")
-    except Exception as e:
-        logger.error(f"An error occurred in /create route: {str(e)}")
-        return "An error occurred"
-
+    if is_logged_in():
+        try:
+            return render_template("index.html")
+        except Exception as e:
+            logger.error(f"An error occurred in /create route: {str(e)}")
+            return "An error occurred"
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/', methods=['GET', 'POST'])
 def new_index():
