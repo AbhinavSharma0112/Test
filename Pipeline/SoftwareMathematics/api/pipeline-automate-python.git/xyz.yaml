@@ -12,7 +12,7 @@ ssh_port_dev: j
 build_command: j
 pvt_deploy_servers_dev: -j
 deploy_servers_dev: -j
-pvt_deploy_servers_prod: -j
+pvt_deploy_servers_prod: -m
 deploy_servers_prodt: null
 deploy_env_prod: j
 deploy_env_dev: j
