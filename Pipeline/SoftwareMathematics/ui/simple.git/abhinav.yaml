@@ -6,14 +6,14 @@ job_type: web
 run_command: java -Xmx256m -jar app.jar
 src_path: https://myurl.com/advance.git
 application_port: appport
-deploy_port: t
-ssh_port_prod: t
-ssh_port_dev: t
-build_command: t
-pvt_deploy_servers_dev: -t
-deploy_servers_dev: -t
-pvt_deploy_servers_prod: -t
+deploy_port: devport
+ssh_port_prod: sshport
+ssh_port_dev: g
+build_command: mvn clean install -DskipTests -s $MAVEN_SETTING
+pvt_deploy_servers_dev: --185.207.250.107 --185.207.250.107 --185.207.250.107
+deploy_servers_dev: --185.207.250.107 --185.207.250.107 --185.207.250.107 --185.207.250.107
+pvt_deploy_servers_prod: -jhhkk
 deploy_servers_prodt: null
-deploy_env_prod: t
-deploy_env_dev: t
-deploy_env: -dev
+deploy_env_prod: lkjjj
+deploy_env_dev:  https://redketchup.io/color-picker
+deploy_env: -qlweh
