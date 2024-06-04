@@ -1,19 +1,19 @@
 name: daskd
 company_name: ui
 repository url: https://abc.com/abc12345.git
-enabled: no
-job_type: flutter
+enabled: yes
+job_type: software
 run_command: java -Xmx256m -jar app.jar
-src_path: https://myurl.com/advance.git
-application_port: t
-deploy_port: t
-ssh_port_prod: t
-ssh_port_dev: t
-build_command: t
-pvt_deploy_servers_dev: -t
-deploy_servers_dev: -t
-pvt_deploy_servers_prod: -t
+src_path: category-service
+application_port: appport
+deploy_port: h
+ssh_port_prod: h
+ssh_port_dev: h
+build_command: h
+pvt_deploy_servers_dev: -h
+deploy_servers_dev: -h
+pvt_deploy_servers_prod: -h
 deploy_servers_prodt: null
-deploy_env_prod: t
-deploy_env_dev: t
-deploy_env: -t
+deploy_env_prod: h
+deploy_env_dev: h
+deploy_env: -h
