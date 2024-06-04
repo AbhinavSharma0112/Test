@@ -4,16 +4,16 @@ repository url: https://abc.com/abc12345.git
 enabled: no
 job_type: software
 run_command: java -Xmx256m -jar app.jar
-src_path: http://myurl.com/advance1234.git
+src_path: https://myurl.com/advance.git
 application_port: appport
 deploy_port: devport
-ssh_port_prod: h
-ssh_port_dev: h
-build_command: h
-pvt_deploy_servers_dev: -h
-deploy_servers_dev: -h
-pvt_deploy_servers_prod: -h
+ssh_port_prod: u
+ssh_port_dev: u
+build_command: u
+pvt_deploy_servers_dev: -u
+deploy_servers_dev: -u
+pvt_deploy_servers_prod: -u
 deploy_servers_prodt: null
-deploy_env_prod: h
-deploy_env_dev: h
-deploy_env: -h
+deploy_env_prod: u
+deploy_env_dev: u
+deploy_env: -u
