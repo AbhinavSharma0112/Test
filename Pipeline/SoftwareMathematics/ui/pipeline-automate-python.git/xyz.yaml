@@ -2,18 +2,18 @@ name: xyz
 company_name: ui
 repository url:  https://github.com/SM-Training/pipeline-automate-python.git
 enabled: yes
-job_type: intern
-run_command: java -Xmx256m -jar app.jar
-src_path: https://myurl.com/advance.git
-application_port: y
-deploy_port: y
-ssh_port_prod: y
-ssh_port_dev: y
-build_command: y
-pvt_deploy_servers_dev: -y
-deploy_servers_dev: -y
-pvt_deploy_servers_prod: -y
+job_type: software
+run_command: h
+src_path: h
+application_port: h
+deploy_port: h
+ssh_port_prod: h
+ssh_port_dev: h
+build_command: h
+pvt_deploy_servers_dev: -h
+deploy_servers_dev: -h
+pvt_deploy_servers_prod: -h
 deploy_servers_prodt: null
-deploy_env_prod: y
-deploy_env_dev: y
-deploy_env: -y
+deploy_env_prod: h
+deploy_env_dev: h
+deploy_env: -h
