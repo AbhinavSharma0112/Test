@@ -1,0 +1,19 @@
+name: shreya
+company_name: ui
+repository url: https://myurl.com/Simple.git
+enabled: no
+job_type: software
+run_command: java -Xmx256m -jar app.jar
+src_path: https://myurl.com/advance.git
+application_port: appport
+deploy_port: h
+ssh_port_prod: h
+ssh_port_dev: h
+build_command: h
+pvt_deploy_servers_dev: -h
+deploy_servers_dev: -h
+pvt_deploy_servers_prod: -h
+deploy_servers_prodt: null
+deploy_env_prod: h
+deploy_env_dev: h
+deploy_env: -h
