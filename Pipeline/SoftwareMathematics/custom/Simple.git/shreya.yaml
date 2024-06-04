@@ -1,19 +1,19 @@
 name: shreya
 company_name: custom
 repository url: https://myurl.com/Simple.git
-enabled: yes
+enabled: no
 job_type: software
 run_command: java -Xmx256m -jar app.jar
-src_path: http://myurl.com/advance1234.git
-application_port: 1
-deploy_port: r
-ssh_port_prod: r
-ssh_port_dev: r
-build_command: r
-pvt_deploy_servers_dev: -r
-deploy_servers_dev: -r
-pvt_deploy_servers_prod: -r
+src_path: https://myurl.com/advance.git
+application_port: hgfh
+deploy_port: devport
+ssh_port_prod: j
+ssh_port_dev: j
+build_command: j
+pvt_deploy_servers_dev: -j
+deploy_servers_dev: -j
+pvt_deploy_servers_prod: -j
 deploy_servers_prodt: null
-deploy_env_prod: r
-deploy_env_dev: r
-deploy_env: -r
+deploy_env_prod: j
+deploy_env_dev: j
+deploy_env: -j
