@@ -13,8 +13,11 @@ import traceback
 
 load_dotenv()
 
+
 def is_logged_in():
     return 'username' in session
+
+
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Secret key for session
@@ -82,8 +85,8 @@ class Signup(Resource):
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# logger = logging.getLogger(__name__)
 
 # MongoDB connection
 mongo_client = MongoClient('mongodb://77.37.45.154:27017/')
@@ -93,6 +96,7 @@ users_collection = db['Users']
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 REPO_OWNER = os.getenv("REPO_OWNER")
 REPO_NAME = os.getenv("REPO_NAME")
+Branch="Test2"
 
 ip_request_counts = {}
 
@@ -127,10 +131,10 @@ def check_rate_limit(response):
         return 0, 0
 
 
-def delete_file_from_github(company_name, repo_name, file_name, github_token):
+def delete_file_from_github(company_name, repo_name, file_name, github_token, branch='Test2'):
     logger.info(f"Deleting file '{file_name}' from GitHub")
     file_path = f'Pipeline/SoftwareMathematics/{company_name}/{repo_name}/{file_name}'
-    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}'
+    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}?ref={branch}'
 
     headers = {
         'Authorization': f'token {github_token}',
@@ -147,7 +151,8 @@ def delete_file_from_github(company_name, repo_name, file_name, github_token):
         # Prepare the deletion request payload
         payload = {
             'message': 'Delete file',  # Provide a descriptive message for the deletion
-            'sha': sha  # Include the SHA hash of the file's current content
+            'sha': sha,  # Include the SHA hash of the file's current content
+            'branch': branch
         }
 
         response = requests.delete(url, headers=headers, json=payload)
@@ -235,8 +240,7 @@ def get_company_names(repo_owner, repo_name, github_token):
     return company_names
 
 
-def get_company_details(company_name, repo_name, file_name, REPO_OWNER, REPO_NAME,
-                        GITHUB_TOKEN):
+def get_company_details(company_name, repo_name, file_name, REPO_OWNER, REPO_NAME, GITHUB_TOKEN):
     company_details = {}
 
     file_path = f'Pipeline/SoftwareMathematics/{company_name}/{repo_name}/{file_name}'
@@ -337,7 +341,7 @@ def add_form():
         }
 
         # Save to GitHub
-        result_message = save_to_github(data)
+        result_message = save_to_github(data, branch='Test2')
         logger.info(result_message)
 
         return result_message
@@ -417,7 +421,7 @@ def update():
     return "Updated"
 
 
-def save_to_github(data):
+def save_to_github(data, branch='Test2'):
     field_order = [
         "name", "company_name", "repository url", "enabled", "job_type", "run_command",
         "src_path", "application_port", "deploy_port", "ssh_port_prod", "ssh_port_dev",
@@ -443,8 +447,9 @@ def save_to_github(data):
     file_name = f'{data["name"]}.yaml'
     file_path = f'Pipeline/SoftwareMathematics/{data["company_name"]}/{repo_name}/{file_name}'
 
-    # Construct the GitHub API URL
-    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}'
+    # Construct the GitHub API URL for the 'Test2' branch
+    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}?ref={branch}'
+    print("GitHub API URL:", url)  # Debug print
 
     # Prepare headers for the GitHub API request
     headers = {
@@ -453,7 +458,8 @@ def save_to_github(data):
     }
 
     # Check if the file already exists on GitHub
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, params={'ref': branch})
+    print("GET Response Status Code:", response.status_code)  # Debug print
 
     if response.status_code == 200:
         # File already exists, update its content
@@ -461,23 +467,28 @@ def save_to_github(data):
         payload = {
             'message': 'Update file',
             'content': file_content_base64,
-            'sha': existing_file['sha']  # SHA of the existing file for update
+            'sha': existing_file['sha'],  # SHA of the existing file for update
+            'branch': branch  # Specify the branch when updating the file
         }
         response = requests.put(url, headers=headers, json=payload)
+        print("Response Status Code:", response.status_code)  # Debug print
+
     elif response.status_code == 404:
         # File does not exist, create a new file
         payload = {
             'message': 'Create file',
-            'content': file_content_base64
+            'content': file_content_base64,
+            'branch': branch  # Specify the branch when creating the file
         }
         response = requests.put(url, headers=headers, json=payload)
+        print("PUT Response Status Code:", response.status_code)  # Debug print
 
     # Return the result message
     if response.status_code == 201 or response.status_code == 200:
-        logger.info('File saved successfully to GitHub.')
+        logging.info('File saved successfully to GitHub.')
         return 'File saved successfully to GitHub.'
     else:
-        logger.error(f'Failed to save file to GitHub. Status code: {response.status_code}')
+        logging.error(f'Failed to save file to GitHub. Status code: {response.status_code}')
         return f'Failed to save file to GitHub. Status code: {response.status_code}'
 
 
@@ -491,6 +502,7 @@ def create_user():
             return "An error occurred"
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/', methods=['GET', 'POST'])
 def new_index():
@@ -593,5 +605,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-
+    app.run(host='0.0.0.0', port=5000, debug=True)
