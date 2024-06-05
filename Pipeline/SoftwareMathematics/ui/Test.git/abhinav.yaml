@@ -1,0 +1,19 @@
+name: abhinav
+company_name: ui
+repository url: https://github.com/AbhinavSharma0112/Test.git
+enabled: no
+job_type: web
+run_command: h
+src_path: k
+application_port: k
+deploy_port: k
+ssh_port_prod: k
+ssh_port_dev: k
+build_command: k
+pvt_deploy_servers_dev: -k
+deploy_servers_dev: -k
+pvt_deploy_servers_prod: -k
+deploy_servers_prodt: null
+deploy_env_prod: k
+deploy_env_dev: k
+deploy_env: -k
