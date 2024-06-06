@@ -1,0 +1,19 @@
+name: abhinav
+company_name: api
+repository url: https://github.com/AbhinavSharma0112/Test.git
+enabled: no
+job_type: intern
+run_command: g
+src_path: g
+application_port: g
+deploy_port: g
+ssh_port_prod: g
+ssh_port_dev: g
+build_command: g
+pvt_deploy_servers_dev: -g
+deploy_servers_dev: -g
+pvt_deploy_servers_prod: -g
+deploy_servers_prodt: null
+deploy_env_prod: g
+deploy_env_dev: g
+deploy_env: -g
