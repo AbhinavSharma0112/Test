@@ -1,0 +1,19 @@
+name: nnn
+company_name: api
+repository url: https://github.com/AbhinavSharma0112/Test.git
+enabled: yes
+job_type: web
+run_command: o
+src_path: o
+application_port: o
+deploy_port: o
+ssh_port_prod: o
+ssh_port_dev: o
+build_command: o
+pvt_deploy_servers_dev: -o
+deploy_servers_dev: -o
+pvt_deploy_servers_prod: -o
+deploy_servers_prodt: null
+deploy_env_prod: o
+deploy_env_dev: o
+deploy_env: -o
