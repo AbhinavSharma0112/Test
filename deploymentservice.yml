@@ -3,22 +3,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nodeapp-deployment
+  name: pipeline-deployment
   labels:
-    app: nodeapp
+    app: pipeline
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nodeapp
+      app: pipeline
   template:
     metadata:
       labels:
-        app: nodeapp 
+        app: pipeline 
     spec:
       containers:
-      - name: nodeserver
-        image: rohit055428181/test-image:latest
+      - name: pipeline-automate
+        image: rohit055428181/pipeline:latest
         ports:
         - containerPort: 5000
         
@@ -28,10 +28,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nodeapp-service
+  name: pipeline-service
 spec:
   selector:
-    app: nodeapp 
+    app: pipeline 
   type: NodePort
   ports:
   - protocol: TCP
