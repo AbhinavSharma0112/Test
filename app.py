@@ -44,6 +44,16 @@ parser.add_argument('username', type=str, required=True, help="Username is requi
 parser.add_argument('password', type=str, required=True, help="Password is required")
 
 
+
+
+def login_required(f):
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__  # Preserve the original function name
+    return decorated_function
+
 class Login(Resource):
     def post(self):
         args = parser.parse_args()
@@ -96,7 +106,7 @@ users_collection = db['Users']
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 REPO_OWNER = os.getenv("REPO_OWNER")
 REPO_NAME = os.getenv("REPO_NAME")
-Branch="Test2"
+
 
 ip_request_counts = {}
 
@@ -131,10 +141,10 @@ def check_rate_limit(response):
         return 0, 0
 
 
-def delete_file_from_github(company_name, repo_name, file_name, github_token, branch='Test2'):
+def delete_file_from_github(company_name, repo_name, file_name, github_token):
     logger.info(f"Deleting file '{file_name}' from GitHub")
     file_path = f'Pipeline/SoftwareMathematics/{company_name}/{repo_name}/{file_name}'
-    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}?ref={branch}'
+    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}'
 
     headers = {
         'Authorization': f'token {github_token}',
@@ -152,7 +162,7 @@ def delete_file_from_github(company_name, repo_name, file_name, github_token, br
         payload = {
             'message': 'Delete file',  # Provide a descriptive message for the deletion
             'sha': sha,  # Include the SHA hash of the file's current content
-            'branch': branch
+
         }
 
         response = requests.delete(url, headers=headers, json=payload)
@@ -170,7 +180,7 @@ def delete_file_from_github(company_name, repo_name, file_name, github_token, br
     return True
 
 
-def fetch_file_names(company_name, repo_name, access_token):
+def fetch_file_names(company_name, repo_name, access_token, Branch='Test3'):
     logger.info(f"Fetching file names for company '{company_name}' and repo '{repo_name}'")
     file_names = []
 
@@ -192,7 +202,7 @@ def fetch_file_names(company_name, repo_name, access_token):
     return file_names
 
 
-def fetch_repo_names(company_name, access_token):
+def fetch_repo_names(company_name, access_token, Branch='Test3'):
     logger.info(f"Fetching repository names for company '{company_name}'")
     repo_names = []
 
@@ -215,7 +225,7 @@ def fetch_repo_names(company_name, access_token):
     return repo_names
 
 
-def get_company_names(repo_owner, repo_name, github_token):
+def get_company_names(repo_owner, repo_name, github_token,branch='Test3'):
     company_names = []
 
     url = f'https://api.github.com/repos/{repo_owner}/{repo_name}/contents/Pipeline/SoftwareMathematics'
@@ -279,74 +289,75 @@ def get_company_details(company_name, repo_name, file_name, REPO_OWNER, REPO_NAM
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_form():
-    if request.method == 'POST':
-        # Retrieve form data
-        username = request.form.get('username')
-        companyname = request.form.get('companyname')
-        repo_url = request.form.get('repourl')
-        enabled = request.form.get('enabled')
-        job_type = request.form.get('job_type')
-        run_command = request.form.get('runcmnd')
-        src_path = request.form.get('srcpath')
-        application_port = request.form.get('applicationport')
-        deploy_port = request.form.get('deployport')
-        ssh_port_prod = request.form.get('sshportprod')
-        ssh_port_dev = request.form.get('sshportdev')
-        build_command = request.form.get('buildcommand')
-        pvt_deploy_servers_dev = request.form.get('pvtdeployserversdev')
-        deploy_servers_dev = request.form.get('deployserversdev')
-        pvt_deploy_servers_prod = request.form.get('pvtdeployserversprod')
-        deploy_servers_prod = request.form.get('deployserversprod')
-        deploy_env_prod = request.form.get('deployenvprod')
-        deploy_env_dev = request.form.get('deployenvdev')
-        deploy_env = request.form.get('deployenv')
+    if is_logged_in():
+        if request.method == 'POST':
+            # Retrieve form data
+            username = request.form.get('username')
+            companyname = request.form.get('companyname')
+            repo_url = request.form.get('repourl')
+            enabled = request.form.get('enabled')
+            job_type = request.form.get('job_type')
+            run_command = request.form.get('runcmnd')
+            src_path = request.form.get('srcpath')
+            application_port = request.form.get('applicationport')
+            deploy_port = request.form.get('deployport')
+            ssh_port_prod = request.form.get('sshportprod')
+            ssh_port_dev = request.form.get('sshportdev')
+            build_command = request.form.get('buildcommand')
+            pvt_deploy_servers_dev = request.form.get('pvtdeployserversdev')
+            deploy_servers_dev = request.form.get('deployserversdev')
+            pvt_deploy_servers_prod = request.form.get('pvtdeployserversprod')
+            deploy_servers_prod = request.form.get('deployserversprod')
+            deploy_env_prod = request.form.get('deployenvprod')
+            deploy_env_dev = request.form.get('deployenvdev')
+            deploy_env = request.form.get('deployenv')
 
-        # Assuming pvt_deploy_servers_dev is a string containing IP addresses separated by spaces
-        pvt_deploy_servers_dev_list = format_ip_list(pvt_deploy_servers_dev)
-        deploy_servers_prod_list = format_ip_list(deploy_servers_prod)
-        pvt_deploy_servers_prod_list = format_ip_list(pvt_deploy_servers_prod)
-        deploy_servers_dev_list = format_ip_list(deploy_servers_dev)
-        deploy_env_list = format_ip_list(deploy_env)
+            # Assuming pvt_deploy_servers_dev is a string containing IP addresses separated by spaces
+            pvt_deploy_servers_dev_list = format_ip_list(pvt_deploy_servers_dev)
+            deploy_servers_prod_list = format_ip_list(deploy_servers_prod)
+            pvt_deploy_servers_prod_list = format_ip_list(pvt_deploy_servers_prod)
+            deploy_servers_dev_list = format_ip_list(deploy_servers_dev)
+            deploy_env_list = format_ip_list(deploy_env)
 
-        # Define the order of fields
-        field_order = [
-            "name", "company_name", "repository url", "enabled", "job_type", "run_command",
-            "src_path", "application_port", "deploy_port", "ssh_port_prod", "ssh_port_dev",
-            "build_command", "pvt_deploy_servers_dev", "deploy_servers_dev",
-            "pvt_deploy_servers_prod", "deploy_servers_prodt", "deploy_env_prod",
-            "deploy_env_dev", "deploy_env"
-        ]
+            # Define the order of fields
+            field_order = [
+                "name", "company_name", "repository url", "enabled", "job_type", "run_command",
+                "src_path", "application_port", "deploy_port", "ssh_port_prod", "ssh_port_dev",
+                "build_command", "pvt_deploy_servers_dev", "deploy_servers_dev",
+                "pvt_deploy_servers_prod", "deploy_servers_prodt", "deploy_env_prod",
+                "deploy_env_dev", "deploy_env"
+            ]
 
-        # Define the data
-        data = {
-            "name": username,
-            "company_name": companyname,
-            "repository url": repo_url,
-            "enabled": enabled,
-            "job_type": job_type,
-            "run_command": run_command,
-            "src_path": src_path,
-            "application_port": application_port,
-            "deploy_port": deploy_port,
-            "ssh_port_prod": ssh_port_prod,
-            "ssh_port_dev": ssh_port_dev,
-            "build_command": build_command,
-            "pvt_deploy_servers_dev": pvt_deploy_servers_dev_list,
-            "deploy_servers_dev": deploy_servers_dev_list,
-            "pvt_deploy_servers_prod": pvt_deploy_servers_prod_list,
-            "deploy_servers_prod": deploy_servers_prod_list,
-            "deploy_env_prod": deploy_env_prod,
-            "deploy_env_dev": deploy_env_dev,
-            "deploy_env": deploy_env_list
-        }
+            # Define the data
+            data = {
+                "name": username,
+                "company_name": companyname,
+                "repository url": repo_url,
+                "enabled": enabled,
+                "job_type": job_type,
+                "run_command": run_command,
+                "src_path": src_path,
+                "application_port": application_port,
+                "deploy_port": deploy_port,
+                "ssh_port_prod": ssh_port_prod,
+                "ssh_port_dev": ssh_port_dev,
+                "build_command": build_command,
+                "pvt_deploy_servers_dev": pvt_deploy_servers_dev_list,
+                "deploy_servers_dev": deploy_servers_dev_list,
+                "pvt_deploy_servers_prod": pvt_deploy_servers_prod_list,
+                "deploy_servers_prod": deploy_servers_prod_list,
+                "deploy_env_prod": deploy_env_prod,
+                "deploy_env_dev": deploy_env_dev,
+                "deploy_env": deploy_env_list
+            }
 
-        # Save to GitHub
-        result_message = save_to_github(data, branch='Test2')
-        logger.info(result_message)
+            # Save to GitHub
+            result_message = save_to_github(data, branch='Test3')
+            logger.info(result_message)
 
-        return result_message
+            return result_message
 
-    return "Data saved successfully!!"
+        return "Data saved successfully!!"
 
 
 def format_ip_list(ip_string):
@@ -405,11 +416,11 @@ def update():
 
                 # Save the updated file to GitHub with the new username
                 new_data['name'] = new_username
-                save_to_github(new_data)
+                save_to_github(new_data, Branch='Test3')
                 logger.info("Updated")
                 return "Updated"
             else:
-                save_to_github(new_data)
+                save_to_github(new_data, Branch='Test3')
                 logger.info("Updated")
                 return "Updated"
 
@@ -421,7 +432,7 @@ def update():
     return "Updated"
 
 
-def save_to_github(data, branch='Test2'):
+def save_to_github(data, branch='Test3'):
     field_order = [
         "name", "company_name", "repository url", "enabled", "job_type", "run_command",
         "src_path", "application_port", "deploy_port", "ssh_port_prod", "ssh_port_dev",
@@ -448,7 +459,7 @@ def save_to_github(data, branch='Test2'):
     file_path = f'Pipeline/SoftwareMathematics/{data["company_name"]}/{repo_name}/{file_name}'
 
     # Construct the GitHub API URL for the 'Test2' branch
-    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}?ref={branch}'
+    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}'
     print("GitHub API URL:", url)  # Debug print
 
     # Prepare headers for the GitHub API request
@@ -458,7 +469,7 @@ def save_to_github(data, branch='Test2'):
     }
 
     # Check if the file already exists on GitHub
-    response = requests.get(url, headers=headers, params={'ref': branch})
+    response = requests.get(url, headers=headers)
     print("GET Response Status Code:", response.status_code)  # Debug print
 
     if response.status_code == 200:
@@ -506,36 +517,36 @@ def create_user():
 
 @app.route('/', methods=['GET', 'POST'])
 def new_index():
-    try:
-        if 'username' not in session:
-            # If user is not logged in, redirect to login page
-            return redirect(url_for('login'))
-        if request.method == 'POST':
-            data = request.get_json()
-            company_names = data.get('company_name')
-            repo_names = data.get('repo_name')
-            file_names = data.get('file_name')
-            if company_names and not repo_names:
-                repo_names = fetch_repo_names(company_names, GITHUB_TOKEN)
-                return jsonify(repo_names)
+        try:
+            if 'username' not in session:
+                # If user is not logged in, redirect to login page
+                return redirect(url_for('login'))
+            if request.method == 'POST':
+                data = request.get_json()
+                company_names = data.get('company_name')
+                repo_names = data.get('repo_name')
+                file_names = data.get('file_name')
+                if company_names and not repo_names:
+                    repo_names = fetch_repo_names(company_names, GITHUB_TOKEN)
+                    return jsonify(repo_names)
 
-            if company_names and repo_names:
-                file_names = fetch_file_names(company_names, repo_names, GITHUB_TOKEN)
-                return jsonify(file_names)
+                if company_names and repo_names:
+                    file_names = fetch_file_names(company_names, repo_names, GITHUB_TOKEN)
+                    return jsonify(file_names)
+                else:
+                    return jsonify({})
             else:
-                return jsonify({})
-        else:
-            # Handle the GET request here
-            company_names = get_company_names(REPO_OWNER, REPO_NAME, GITHUB_TOKEN)
+                # Handle the GET request here
+                company_names = get_company_names(REPO_OWNER, REPO_NAME, GITHUB_TOKEN)
 
-            # Log company names
-            logger.info(f"Company names: {company_names}")
+                # Log company names
+                logger.info(f"Company names: {company_names}")
 
-            return render_template("base.html", company_names=company_names)
-    except Exception as e:
-        # Log any exceptions
-        logger.error(f"An error occurred in / route: {str(e)}")
-        return "An error occurred"
+                return render_template("base.html", company_names=company_names)
+        except Exception as e:
+            # Log any exceptions
+            logger.error(f"An error occurred in / route: {str(e)}")
+            return "An error occurred"
 
 
 @app.route('/login', methods=['GET', 'POST'])
