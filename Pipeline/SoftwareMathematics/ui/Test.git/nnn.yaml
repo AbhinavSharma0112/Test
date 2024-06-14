@@ -1,0 +1,19 @@
+name: nnn
+company_name: ui
+repository url: https://github.com/Abhinav12/Test.git
+enabled: yes
+job_type: web
+run_command: u
+src_path: y
+application_port: y
+deploy_port: y
+ssh_port_prod: y
+ssh_port_dev: y
+build_command: y
+pvt_deploy_servers_dev: -y
+deploy_servers_dev: -y
+pvt_deploy_servers_prod: -y
+deploy_servers_prodt: null
+deploy_env_prod: y
+deploy_env_dev: y
+deploy_env: -y
