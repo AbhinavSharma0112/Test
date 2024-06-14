@@ -180,7 +180,7 @@ def delete_file_from_github(company_name, repo_name, file_name, github_token):
     return True
 
 
-def fetch_file_names(company_name, repo_name, access_token, Branch='Test3'):
+def fetch_file_names(company_name, repo_name, access_token, Branch='Test2'):
     logger.info(f"Fetching file names for company '{company_name}' and repo '{repo_name}'")
     file_names = []
 
@@ -202,7 +202,7 @@ def fetch_file_names(company_name, repo_name, access_token, Branch='Test3'):
     return file_names
 
 
-def fetch_repo_names(company_name, access_token, Branch='Test3'):
+def fetch_repo_names(company_name, access_token, Branch='Test2'):
     logger.info(f"Fetching repository names for company '{company_name}'")
     repo_names = []
 
@@ -225,7 +225,7 @@ def fetch_repo_names(company_name, access_token, Branch='Test3'):
     return repo_names
 
 
-def get_company_names(repo_owner, repo_name, github_token,branch='Test3'):
+def get_company_names(repo_owner, repo_name, github_token,branch='Test2'):
     company_names = []
 
     url = f'https://api.github.com/repos/{repo_owner}/{repo_name}/contents/Pipeline/SoftwareMathematics'
@@ -288,8 +288,9 @@ def get_company_details(company_name, repo_name, file_name, REPO_OWNER, REPO_NAM
 
 
 @app.route('/add', methods=['GET', 'POST'])
+@login_required
 def add_form():
-    if is_logged_in():
+
         if request.method == 'POST':
             # Retrieve form data
             username = request.form.get('username')
@@ -352,7 +353,7 @@ def add_form():
             }
 
             # Save to GitHub
-            result_message = save_to_github(data, branch='Test3')
+            result_message = save_to_github(data, branch='Test2')
             logger.info(result_message)
 
             return result_message
@@ -416,11 +417,11 @@ def update():
 
                 # Save the updated file to GitHub with the new username
                 new_data['name'] = new_username
-                save_to_github(new_data, Branch='Test3')
+                save_to_github(new_data, Branch='Test2')
                 logger.info("Updated")
                 return "Updated"
             else:
-                save_to_github(new_data, Branch='Test3')
+                save_to_github(new_data, Branch='Test2')
                 logger.info("Updated")
                 return "Updated"
 
@@ -432,7 +433,7 @@ def update():
     return "Updated"
 
 
-def save_to_github(data, branch='Test3'):
+def save_to_github(data, branch='Test2'):
     field_order = [
         "name", "company_name", "repository url", "enabled", "job_type", "run_command",
         "src_path", "application_port", "deploy_port", "ssh_port_prod", "ssh_port_dev",
