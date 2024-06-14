@@ -1,0 +1,19 @@
+name: hhhhhhhhhh
+company_name: ui
+repository url: https://github.com/hajsdh/Test.git
+enabled: no
+job_type: software
+run_command: t
+src_path: o
+application_port: u
+deploy_port: u
+ssh_port_prod: u
+ssh_port_dev: u
+build_command: u
+pvt_deploy_servers_dev: -u
+deploy_servers_dev: -u
+pvt_deploy_servers_prod: -u
+deploy_servers_prodt: null
+deploy_env_prod: u
+deploy_env_dev: u
+deploy_env: -u
