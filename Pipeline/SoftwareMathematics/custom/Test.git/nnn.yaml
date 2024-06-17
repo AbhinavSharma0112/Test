@@ -1,0 +1,19 @@
+name: nnn
+company_name: custom
+repository url: https://github.com/hajsdh/Test.git
+enabled: yes
+job_type: software
+run_command: j
+src_path: g
+application_port: t
+deploy_port: t
+ssh_port_prod: t
+ssh_port_dev: t
+build_command: t
+pvt_deploy_servers_dev: -t
+deploy_servers_dev: -t
+pvt_deploy_servers_prod: -t
+deploy_servers_prodt: null
+deploy_env_prod: t
+deploy_env_dev: t
+deploy_env: -t
