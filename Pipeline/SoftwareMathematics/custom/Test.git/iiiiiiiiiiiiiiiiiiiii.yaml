@@ -1,0 +1,19 @@
+name: iiiiiiiiiiiiiiiiiiiii
+company_name: custom
+repository url: https://github.com/AbhinavSharma0112/Test.git
+enabled: no
+job_type: flutter
+run_command: r
+src_path: r
+application_port: r
+deploy_port: r
+ssh_port_prod: r
+ssh_port_dev: r
+build_command: r
+pvt_deploy_servers_dev: -r
+deploy_servers_dev: -r
+pvt_deploy_servers_prod: -r
+deploy_servers_prodt: null
+deploy_env_prod: r
+deploy_env_dev: r
+deploy_env: -r
