@@ -42,10 +42,6 @@ users = [
 parser = reqparse.RequestParser()
 parser.add_argument('username', type=str, required=True, help="Username is required")
 parser.add_argument('password', type=str, required=True, help="Password is required")
-
-
-
-
 def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'username' not in session:
@@ -53,7 +49,6 @@ def login_required(f):
         return f(*args, **kwargs)
     decorated_function.__name__ = f.__name__  # Preserve the original function name
     return decorated_function
-
 class Login(Resource):
     def post(self):
         args = parser.parse_args()
@@ -98,10 +93,10 @@ class Signup(Resource):
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # logger = logging.getLogger(__name__)
 
-# MongoDB connection
-mongo_client = MongoClient('mongodb://77.37.45.154:27017/')
-db = mongo_client['UserAuth']
-users_collection = db['Users']
+# # MongoDB connection
+# mongo_client = MongoClient('mongodb://77.37.45.154:27017/')
+# db = mongo_client['UserAuth']
+# users_collection = db['Users']
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 REPO_OWNER = os.getenv("REPO_OWNER")
@@ -417,11 +412,11 @@ def update():
 
                 # Save the updated file to GitHub with the new username
                 new_data['name'] = new_username
-                save_to_github(new_data, Branch='Test2')
+                save_to_github(new_data,)
                 logger.info("Updated")
                 return "Updated"
             else:
-                save_to_github(new_data, Branch='Test2')
+                save_to_github(new_data,)
                 logger.info("Updated")
                 return "Updated"
 
@@ -505,49 +500,48 @@ def save_to_github(data, branch='Test2'):
 
 
 @app.route('/create')
+@login_required
 def create_user():
-    if is_logged_in():
-        try:
-            return render_template("index.html")
-        except Exception as e:
-            logger.error(f"An error occurred in /create route: {str(e)}")
-            return "An error occurred"
-    else:
-        return redirect(url_for('login'))
-
+    try:
+        return render_template("index.html")
+    except Exception as e:
+        logger.error(f"An error occurred in /create route: {str(e)}")
+        return "An error occurred"
 
 @app.route('/', methods=['GET', 'POST'])
 def new_index():
-        try:
-            if 'username' not in session:
-                # If user is not logged in, redirect to login page
-                return redirect(url_for('login'))
-            if request.method == 'POST':
-                data = request.get_json()
-                company_names = data.get('company_name')
-                repo_names = data.get('repo_name')
-                file_names = data.get('file_name')
-                if company_names and not repo_names:
-                    repo_names = fetch_repo_names(company_names, GITHUB_TOKEN)
-                    return jsonify(repo_names)
+    try:
+        if not is_logged_in():
+            return redirect(url_for('login'))
 
-                if company_names and repo_names:
-                    file_names = fetch_file_names(company_names, repo_names, GITHUB_TOKEN)
-                    return jsonify(file_names)
-                else:
-                    return jsonify({})
-            else:
-                # Handle the GET request here
-                company_names = get_company_names(REPO_OWNER, REPO_NAME, GITHUB_TOKEN)
+        if request.method == 'POST':
+            data = request.get_json()
+            company_names = data.get('company_name')
+            repo_names = data.get('repo_name')
+            file_names = data.get('file_name')
 
-                # Log company names
-                logger.info(f"Company names: {company_names}")
+            if company_names and not repo_names:
+                repo_names = fetch_repo_names(company_names, GITHUB_TOKEN)
+                return jsonify(repo_names)
 
-                return render_template("base.html", company_names=company_names)
-        except Exception as e:
-            # Log any exceptions
-            logger.error(f"An error occurred in / route: {str(e)}")
-            return "An error occurred"
+            if company_names and repo_names:
+                file_names = fetch_file_names(company_names, repo_names, GITHUB_TOKEN)
+                return jsonify(file_names)
+
+            return jsonify({})
+
+        else:  # Handle the GET request here
+            company_names = get_company_names(REPO_OWNER, REPO_NAME, GITHUB_TOKEN)
+
+            # Log company names
+            logger.info(f"Company names: {company_names}")
+
+            return render_template("base.html", company_names=company_names)
+    except Exception as e:
+        # Log any exceptions
+        logger.error(f"An error occurred in / route: {str(e)}")
+        return "An error occurred"
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
