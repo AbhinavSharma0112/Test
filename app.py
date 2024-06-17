@@ -181,7 +181,7 @@ def fetch_file_names(company_name, repo_name, access_token, Branch='Test2'):
 
     target_url = (
         f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/Pipeline/SoftwareMathematics/'
-        f'{company_name}/{repo_name}')
+        f'{company_name}/{repo_name}?ref={Branch}')
     headers = {"Authorization": f"token {access_token}"} if access_token else {}
 
     response = requests.get(target_url, headers=headers)
@@ -196,30 +196,32 @@ def fetch_file_names(company_name, repo_name, access_token, Branch='Test2'):
 
     return file_names
 
-
 def fetch_repo_names(company_name, access_token, Branch='Test2'):
     logger.info(f"Fetching repository names for company '{company_name}'")
     repo_names = []
 
     target_url = (
         f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/Pipeline/SoftwareMathematics/'
-        f'{company_name}')
+        f'{company_name}?ref={Branch}')
 
     headers = {"Authorization": f"token {access_token}"} if access_token else {}
 
-    response = requests.get(target_url, headers=headers)
+    try:
+        response = requests.get(target_url, headers=headers)
 
-    if response.status_code != 200:
-        logger.error(f"Failed to fetch repositories. Status code: {response.status_code}")
-        return repo_names
+        if response.status_code == 200:
+            repo_list = response.json()
+            for item in repo_list:
+                if item["type"] == "dir":
+                    repo_names.append(item["name"])
+        else:
+            logger.error(f"Failed to fetch repositories. Status code: {response.status_code}")
+            logger.error(f"Response content: {response.content.decode()}")  # Log response content for debugging
 
-    for item in response.json():
-        if item["type"] == "dir":
-            repo_names.append(item["name"])
+    except requests.exceptions.RequestException as e:
+        logger.error(f"An error occurred while fetching repositories: {e}")
 
     return repo_names
-
-
 def get_company_names(repo_owner, repo_name, github_token,branch='Test2'):
     company_names = []
 
@@ -308,6 +310,10 @@ def add_form():
             deploy_env_dev = request.form.get('deployenvdev')
             deploy_env = request.form.get('deployenv')
 
+            # Fetch repository name from the form
+            repo_parts = repo_url.split('/')
+            repo_name = repo_parts[-1]
+            
             # Assuming pvt_deploy_servers_dev is a string containing IP addresses separated by spaces
             pvt_deploy_servers_dev_list = format_ip_list(pvt_deploy_servers_dev)
             deploy_servers_prod_list = format_ip_list(deploy_servers_prod)
