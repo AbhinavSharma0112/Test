@@ -1,0 +1,19 @@
+name: A
+company_name: api
+repository url: B
+enabled: yes
+job_type: software
+run_command: sudo su
+src_path: a
+application_port: a
+deploy_port: s
+ssh_port_prod: s
+ssh_port_dev: s
+build_command: s
+pvt_deploy_servers_dev: -s
+deploy_servers_dev: -s
+pvt_deploy_servers_prod: -s
+deploy_servers_prodt: null
+deploy_env_prod: s
+deploy_env_dev: s
+deploy_env: -dev
