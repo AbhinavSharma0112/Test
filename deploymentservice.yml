@@ -1,0 +1,40 @@
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-deployment
+  labels:
+    app: pipeline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pipeline
+  template:
+    metadata:
+      labels:
+        app: pipeline 
+    spec:
+      containers:
+      - name: pipeline-automate
+        image: rohit055428181/pipeline:latest
+        ports:
+        - containerPort: 5000
+        
+        
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pipeline-service
+spec:
+  selector:
+    app: pipeline 
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 5000
+    nodePort: 31111
